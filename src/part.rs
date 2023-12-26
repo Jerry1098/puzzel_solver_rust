@@ -1,7 +1,18 @@
-mod direction;
+pub(crate) mod direction;
+
+use std::usize;
 
 use crate::part::direction::Direction;
 use gnuplot::{AxesCommon, Caption, Color, Figure, PlotOption::PointSize, AutoOption::Fix};
+
+#[derive(Debug)]
+#[derive(Clone)]
+#[derive(PartialEq, Copy)]
+pub enum Orientation {
+    A,
+    B,
+    C,
+}
 
 #[derive(Clone, Debug)]
 pub struct Part {
@@ -9,6 +20,21 @@ pub struct Part {
     pub directions_b: Vec<Vec<Direction>>,
     pub directions_c: Vec<Vec<Direction>>,
     pub id: i32,
+    pub orientation: Orientation,
+    pub used: bool
+}
+
+impl Default for Part {
+    fn default() -> Self {
+        Part {
+            directions_a: Vec::new(),
+            directions_b: Vec::new(),
+            directions_c: Vec::new(),
+            id: 0,
+            orientation: Orientation::A,
+            used: false,
+        }
+    }
 }
 
 impl Part {
@@ -34,7 +60,8 @@ impl Part {
                 Direction::DownRight,
                 Direction::DownRight,
             ]],
-            id: 1,
+            id: 0,
+            ..Default::default()
         });
 
         parts.push(Part {
@@ -54,7 +81,8 @@ impl Part {
                 Direction::Right,
                 Direction::Right,
             ]],
-            id: 2,
+            id: 1,
+            ..Default::default()
         });
 
         parts.push(Part {
@@ -74,7 +102,8 @@ impl Part {
                 Direction::DownRight,
                 Direction::DownRight,
             ]],
-            id: 3,
+            id: 2,
+            ..Default::default()
         });
 
         parts.push(Part {
@@ -96,7 +125,8 @@ impl Part {
                 Direction::Right,
                 Direction::DownRight,
             ]],
-            id: 4,
+            id: 3,
+            ..Default::default()
         });
 
         parts.push(Part {
@@ -105,7 +135,7 @@ impl Part {
             ], vec![
                 Direction::DownLeft,
                 Direction::DownLeft,
-                Direction::UpRight,
+                Direction::UpLeft,
             ]],
             directions_b: vec![vec![
                 Direction::Right,
@@ -119,7 +149,8 @@ impl Part {
                 Direction::DownRight,
                 Direction::UpRight
             ]],
-            id: 5,
+            id: 4,
+            ..Default::default()
         });
 
         parts.push(Part {
@@ -142,7 +173,8 @@ impl Part {
                 Direction::DownLeft,
                 Direction::DownRight
             ]],
-            id: 6,
+            id: 5,
+            ..Default::default()
         });
 
         parts.push(Part {
@@ -166,7 +198,8 @@ impl Part {
                 Direction::DownRight,
                 Direction::DownLeft
             ]],
-            id: 7,
+            id: 6,
+            ..Default::default()
         });
 
         parts.push(Part {
@@ -189,7 +222,8 @@ impl Part {
                 Direction::UpRight,
                 Direction::DownRight
             ]],
-            id: 8,
+            id: 7,
+            ..Default::default()
         });
 
         parts.push(Part {
@@ -212,7 +246,8 @@ impl Part {
                 Direction::DownRight,
                 Direction::DownRight
             ]],
-            id: 9,
+            id: 8,
+            ..Default::default()
         });
 
         parts.push(Part {
@@ -236,7 +271,8 @@ impl Part {
                 Direction::Left,
                 Direction::DownLeft
             ]],
-            id: 10,
+            id: 9,
+            ..Default::default()
         });
 
         parts.push(Part {
@@ -266,7 +302,8 @@ impl Part {
                 Direction::DownRight,
                 Direction::DownRight
             ]],
-            id: 11,
+            id: 10,
+            ..Default::default()
         });
 
         parts.push(Part {
@@ -288,12 +325,44 @@ impl Part {
                 Direction::DownRight,
                 Direction::DownRight,
                 Direction::DownRight,
-                Direction::Left
+                Direction::Right
             ]],
-            id: 12,
+            id: 11,
+            ..Default::default()
         });
 
         parts
+    }
+
+    pub fn get_directions(&self, orientation: Orientation) -> Vec<Vec<Direction>> {
+        match orientation {
+            Orientation::A => {
+                return self.directions_a.clone();
+            }
+            Orientation::B => {
+                return self.directions_b.clone();
+            }
+            Orientation::C => {
+                return self.directions_c.clone();
+            }
+        }
+    }
+
+    pub fn get_next_part(id: usize, orientation: Orientation) -> Option<(usize, Orientation)> {
+        if orientation == Orientation::C {
+            if id + 1 == 12 {return None;}
+            return Some((id + 1, Orientation::A));
+        }
+
+        if orientation == Orientation::A {
+            return Some((id, Orientation::B));
+        }
+
+        if orientation == Orientation::B {
+            return Some((id, Orientation::C));
+        }
+
+        None
     }
 
     pub fn visualize_part(directions: &Vec<Vec<Direction>>) {
@@ -370,4 +439,6 @@ impl Part {
         }
         fg.show().unwrap();
     }
+
+    
 }
