@@ -1,60 +1,15 @@
+mod part;
 
+use crate::part::Part;
 
-#[derive(Clone)]
-enum Direction {
-    UpLeft,
-    UpRight,
-    Right,
-    Left,
-    DownRight,
-    DownLeft
-}
-
-#[derive(Clone)]
-struct Part {
-    directions_a: Vec<Vec<Direction>>,
-    directions_b: Vec<Vec<Direction>>,
-    directions_c: Vec<Vec<Direction>>,
-    id: i32
-}
-
-impl Part {
-    fn get_parts_list() -> Vec<Part> {
-        let mut parts = Vec::new();
-
-        parts.push(Part {
-            directions_a: vec![vec![Direction::Right, Direction::DownLeft, Direction::Left, Direction::Left]],
-            directions_b: vec![vec![Direction::DownLeft, Direction::DownLeft, Direction::Right, Direction::DownLeft]],
-            directions_c: vec![vec![Direction::DownRight, Direction::UpRight, Direction::DownRight, Direction::DownRight]],
-            id: 1
-        });
-
-        parts.push(Part {
-            directions_a: vec![vec![Direction::DownLeft, Direction::DownLeft], vec![Direction::Right, Direction::Right]],
-            directions_b: vec![vec![Direction::DownRight, Direction::DownRight, Direction::DownLeft, Direction::DownLeft]],
-            directions_c: vec![vec![Direction::DownRight, Direction::DownRight, Direction::Right, Direction::Right]],
-            id: 2
-        });
-
-        parts.push(Part {
-            directions_a: vec![vec![Direction::DownLeft, Direction::Left, Direction::Left], vec![Direction::Right]],
-            directions_b: vec![vec![Direction::DownLeft, Direction::DownLeft, Direction::DownRight, Direction::DownLeft]],
-            directions_c: vec![vec![Direction::DownRight, Direction::Right, Direction::DownRight, Direction::DownRight]],
-            id: 3
-        });
-        
-        parts
-    }
-}
-
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct Node {
     occupied: bool,
     part: Option<Part>,
 }
 
 struct Gameboard {
-    board: Vec<Vec<Node>>
+    board: Vec<Vec<Node>>,
 }
 
 impl Gameboard {
@@ -72,7 +27,7 @@ impl Gameboard {
             for _ in 0..row_length {
                 row.push(Node {
                     occupied: false,
-                    part: None
+                    part: None,
                 });
             }
             board.push(row);
@@ -95,16 +50,92 @@ impl Gameboard {
         result
     }
 
-    fn top_left(&self, x: usize, y: usize) -> Option<&Node> {
-        if x == 0 || y == 0 {
-            None
+    fn is_point_in_bounds(x: i32, y: i32) -> Option<(usize, usize)> {
+        if x < 0 || y < 0 {
+            return None;
+        }
+
+        if x > 8 {
+            return None;
+        }
+
+        if x < 5 {
+            if y > x + 4 {
+                return None;
+            }
         } else {
-            Some(&self.board[x - 1][y - 1])
+            if y > 12 - x {
+                return None;
+            }
+        }
+
+        Some((x as usize, y as usize))
+    }
+
+    fn get_top_left(&self, x: i32, y: i32) -> Option<&Node> {
+        let new_x = x - 1;
+        let new_y = y - 1;
+
+        match Self::is_point_in_bounds(new_x, new_y) {
+            None => None,
+            Some((x, y)) => Some(&self.board[x][y]),
+        }
+    }
+
+    fn get_top_right(&self, x: i32, y: i32) -> Option<&Node> {
+        let new_x = x;
+        let new_y = y - 1;
+
+        match Self::is_point_in_bounds(new_x, new_y) {
+            None => None,
+            Some((x, y)) => Some(&self.board[x][y]),
+        }
+    }
+
+    fn get_left(&self, x: i32, y: i32) -> Option<&Node> {
+        let new_x = x - 1;
+        let new_y = y;
+
+        match Self::is_point_in_bounds(new_x, new_y) {
+            None => None,
+            Some((x, y)) => Some(&self.board[x][y]),
+        }
+    }
+
+    fn get_right(&self, x: i32, y: i32) -> Option<&Node> {
+        let new_x = x + 1;
+        let new_y = y;
+
+        match Self::is_point_in_bounds(new_x, new_y) {
+            None => None,
+            Some((x, y)) => Some(&self.board[x][y]),
+        }
+    }
+
+    fn get_bottom_left(&self, x: i32, y: i32) -> Option<&Node> {
+        let new_x = x;
+        let new_y = y + 1;
+
+        match Self::is_point_in_bounds(new_x, new_y) {
+            None => None,
+            Some((x, y)) => Some(&self.board[x][y]),
+        }
+    }
+
+    fn get_bottom_right(&self, x: i32, y: i32) -> Option<&Node> {
+        let new_x = x + 1;
+        let new_y = y + 1;
+
+        match Self::is_point_in_bounds(new_x, new_y) {
+            None => None,
+            Some((x, y)) => Some(&self.board[x][y]),
         }
     }
 }
-
 fn main() {
     let gameboard = Gameboard::new();
-    
+    match gameboard.get_right(0, 0) {
+        None => println!("None"),
+        Some(node) => println!("{:?}", node),
+    }
 }
